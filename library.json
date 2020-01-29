@@ -1,0 +1,12 @@
+{
+    "id": "{1961CDAF-8BEC-D073-B0E3-F793432E0628}",
+    "author": "Ulrich Bittner",
+    "name": "Benachrichtigungszentrale",
+    "url": "https://github.com/ubittner/Benachrichtigungszentrale",
+    "compatibility": {
+        "version": "5.2"
+    },
+    "version": "4.0",
+    "build": 1,
+    "date": 1580317200
+}

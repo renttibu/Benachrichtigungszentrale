@@ -1,0 +1,14 @@
+{
+  "id": "{D184C522-507F-BED6-6731-728CE156D659}",
+  "name": "Benachrichtigungszentrale",
+  "type": 3,
+  "vendor": "NTUB",
+  "aliases": [
+    "Benachrichtigungszentrale"
+  ],
+  "url": "https://github.com/ubittner/Benachrichtigungszentrale",
+  "parentRequirements": [],
+  "childRequirements": [],
+  "implemented": [],
+  "prefix": "BENA"
+}

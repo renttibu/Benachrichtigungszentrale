@@ -12,9 +12,9 @@
  * @license    	CC BY-NC-SA 4.0
  *              https://creativecommons.org/licenses/by-nc-sa/4.0/
  *
- * @version     4.00-1
- * @date        2020-01-29, 18:00, 1580317200
- * @review      2020-01-29, 18:00,
+ * @version     4.00-2
+ * @date        2020-01-30, 18:00, 1580403600
+ * @review      2020-01-30, 18:00
  *
  * @see         https://github.com/ubittner/Benachrichtigungszentrale/
  *
@@ -109,7 +109,6 @@ class Benachrichtigungszentrale extends IPSModule
         $this->RegisterPropertyString('MailRecipients', '[]');
 
         // SMS notification
-        $this->RegisterPropertyString('SMSUser', '');
         $this->RegisterPropertyString('SMSToken', '');
         $this->RegisterPropertyString('SMSOriginator', '');
         $this->RegisterPropertyString('SMSRecipients', '[]');
@@ -213,10 +212,6 @@ class Benachrichtigungszentrale extends IPSModule
         if (!empty($recipients)) {
             foreach ($recipients as $recipient) {
                 if ($recipient->Use) {
-                    if (empty($this->ReadPropertyString('SMSUser'))) {
-                        $this->LogMessage('Instanzkonfiguration, SMS Benachrichtigung, Benutzer nicht angegeben!', KL_ERROR);
-                        $state = 200;
-                    }
                     if (empty($this->ReadPropertyString('SMSToken'))) {
                         $this->LogMessage('Instanzkonfiguration, SMS Benachrichtigung, Token nicht angegeben!', KL_ERROR);
                         $state = 200;

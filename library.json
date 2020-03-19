@@ -4,9 +4,9 @@
     "name": "Benachrichtigungszentrale",
     "url": "https://github.com/ubittner/Benachrichtigungszentrale",
     "compatibility": {
-        "version": "5.2"
+        "version": "5.1"
     },
-    "version": "4.0",
-    "build": 2,
+    "version": "4.00",
+    "build": 5,
     "date": 1580403600
 }

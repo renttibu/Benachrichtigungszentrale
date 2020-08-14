@@ -1,5 +1,8 @@
 <?php
 
+/** @noinspection DuplicatedCode */
+/** @noinspection PhpUnused */
+
 /*
  * @module      Benachrichtigungszentrale
  *
@@ -12,11 +15,7 @@
  * @license    	CC BY-NC-SA 4.0
  *              https://creativecommons.org/licenses/by-nc-sa/4.0/
  *
- * @version     4.00-5
- * @date        2020-01-30, 18:00, 1580403600
- * @review      2020-01-30, 18:00
- *
- * @see         https://github.com/ubittner/Benachrichtigungszentrale/
+ * @see         https://github.com/ubittner/Alarmierungssystem/
  *
  * @guids       Library
  *              {1961CDAF-8BEC-D073-B0E3-F793432E0628}
@@ -25,7 +24,6 @@
  *             	{D184C522-507F-BED6-6731-728CE156D659}
  */
 
-// Declare
 declare(strict_types=1);
 
 // Include
@@ -34,9 +32,12 @@ include_once __DIR__ . '/helper/autoload.php';
 class Benachrichtigungszentrale extends IPSModule
 {
     // Helper
+    use BENA_backupRestore;
     use BENA_notifications;
 
     // Constants
+    private const BENACHRICHTIGUNGSZENTRALE_LIBRARY_GUID = '{1961CDAF-8BEC-D073-B0E3-F793432E0628}';
+    private const BENACHRICHTIGUNGSZENTRALE_MODULE_GUID = '{D184C522-507F-BED6-6731-728CE156D659}';
     private const WEBFRONT_MODULE_GUID = '{3565B1F2-8F7B-4311-A4B6-1BF1D868F39E}';
     private const SMTP_MODULE_GUID = '{375EAF21-35EF-4BC4-83B3-C780FD8BD88A}';
 
@@ -44,17 +45,9 @@ class Benachrichtigungszentrale extends IPSModule
     {
         // Never delete this line!
         parent::Create();
-
-        // Register properties
         $this->RegisterProperties();
-
-        // Register timers
         $this->RegisterTimers();
-
-        // Register attributes
         $this->RegisterAttributes();
-
-        // Register scripts
         $this->RegisterScripts();
     }
 
@@ -62,26 +55,25 @@ class Benachrichtigungszentrale extends IPSModule
     {
         // Wait until IP-Symcon is started
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
-
         // Never delete this line!
         parent::ApplyChanges();
-
         // Check runlevel
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
-
-        // Validate configuration
         $this->ValidateConfiguration();
-
-        // Hide instance
-        IPS_SetHidden($this->InstanceID, true);
+        $this->CheckMaintenanceMode();
     }
 
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
         // Send debug
         $this->SendDebug('MessageSink', 'Message from SenderID ' . $SenderID . ' with Message ' . $Message . "\r\n Data: " . print_r($Data, true), 0);
+        if (!empty($Data)) {
+            foreach ($Data as $key => $value) {
+                $this->SendDebug(__FUNCTION__, 'Data[' . $key . '] = ' . json_encode($value), 0);
+            }
+        }
         switch ($Message) {
             case IPS_KERNELSTARTED:
                 $this->KernelReady();
@@ -90,24 +82,50 @@ class Benachrichtigungszentrale extends IPSModule
         }
     }
 
-    protected function KernelReady()
+    public function GetConfigurationForm()
+    {
+        $formData = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        $moduleInfo = [];
+        $library = IPS_GetLibrary(self::BENACHRICHTIGUNGSZENTRALE_LIBRARY_GUID);
+        $module = IPS_GetModule(self::BENACHRICHTIGUNGSZENTRALE_MODULE_GUID);
+        $moduleInfo['name'] = $module['ModuleName'];
+        $moduleInfo['version'] = $library['Version'] . '-' . $library['Build'];
+        $moduleInfo['date'] = date('d.m.Y', $library['Date']);
+        $moduleInfo['time'] = date('H:i', $library['Date']);
+        $moduleInfo['developer'] = $library['Author'];
+        $formData['elements'][0]['items'][2]['caption'] = "Instanz ID:\t\t" . $this->InstanceID;
+        $formData['elements'][0]['items'][3]['caption'] = "Modul:\t\t\t" . $moduleInfo['name'];
+        $formData['elements'][0]['items'][4]['caption'] = "Version:\t\t\t" . $moduleInfo['version'];
+        $formData['elements'][0]['items'][5]['caption'] = "Datum:\t\t\t" . $moduleInfo['date'];
+        $formData['elements'][0]['items'][6]['caption'] = "Uhrzeit:\t\t\t" . $moduleInfo['time'];
+        $formData['elements'][0]['items'][7]['caption'] = "Entwickler:\t\t" . $moduleInfo['developer'];
+        $formData['elements'][0]['items'][8]['caption'] = "Präfix:\t\t\tBENA";
+        return json_encode($formData);
+    }
+
+    public function ReloadConfiguration()
+    {
+        $this->ReloadForm();
+    }
+
+    #################### Private
+
+    private function KernelReady()
     {
         $this->ApplyChanges();
     }
 
-    //#################### Private
-
     private function RegisterProperties(): void
     {
+        $this->RegisterPropertyString('Note', '');
+        $this->RegisterPropertyBoolean('MaintenanceMode', false);
         // Push notification
         $this->RegisterPropertyString('WebFronts', '[]');
         $this->RegisterPropertyBoolean('ConfirmAlarmNotification', false);
         $this->RegisterPropertyInteger('RepeatAlarmNotificationDurationTime', 60);
         $this->RegisterPropertyInteger('AlarmNotificationAttempts', 3);
-
         // E-Mail notification
         $this->RegisterPropertyString('MailRecipients', '[]');
-
         // SMS notification
         $this->RegisterPropertyString('SMSToken', '');
         $this->RegisterPropertyString('SMSOriginator', '');
@@ -142,14 +160,13 @@ class Benachrichtigungszentrale extends IPSModule
     {
         $this->RegisterScript('ConfirmAlarmNotification', 'Alarmquittierung', "<?php BENA_ConfirmAlarmNotification(IPS_GetParent(\$_IPS['SELF']));");
         $resetScript = $this->GetIDForIdent('ConfirmAlarmNotification');
-        IPS_SetPosition($resetScript, 1);
+        IPS_SetPosition($resetScript, 10);
         IPS_SetHidden($resetScript, true);
     }
 
     private function ValidateConfiguration(): void
     {
         $state = 102;
-
         // Push notification
         $webFronts = json_decode($this->ReadPropertyString('WebFronts'));
         if (!empty($webFronts)) {
@@ -175,7 +192,6 @@ class Benachrichtigungszentrale extends IPSModule
                 }
             }
         }
-
         // E-Mail recipients
         $recipients = json_decode($this->ReadPropertyString('MailRecipients'));
         if (!empty($recipients)) {
@@ -206,7 +222,6 @@ class Benachrichtigungszentrale extends IPSModule
                 }
             }
         }
-
         // SMS notification
         $recipients = json_decode($this->ReadPropertyString('SMSRecipients'));
         if (!empty($recipients)) {
@@ -228,8 +243,22 @@ class Benachrichtigungszentrale extends IPSModule
                 }
             }
         }
-
         // Set state
         $this->SetStatus($state);
+    }
+
+    private function CheckMaintenanceMode(): bool
+    {
+        $result = false;
+        $status = 102;
+        if ($this->ReadPropertyBoolean('MaintenanceMode')) {
+            $result = true;
+            $status = 104;
+            $this->SendDebug(__FUNCTION__, 'Abbruch, der Wartungsmodus ist aktiv!', 0);
+            $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', Abbruch, der Wartungsmodus ist aktiv!', KL_WARNING);
+        }
+        $this->SetStatus($status);
+        IPS_SetDisabled($this->InstanceID, $result);
+        return $result;
     }
 }

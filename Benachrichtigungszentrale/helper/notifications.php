@@ -1,6 +1,8 @@
 <?php
 
-// Declare
+/** @noinspection PhpUnused */
+/** @noinspection DuplicatedCode */
+
 declare(strict_types=1);
 
 trait BENA_notifications
@@ -22,6 +24,9 @@ trait BENA_notifications
      */
     public function SendNotification(string $PushTitle, string $PushText, string $EmailSubject, string $EmailText, string $SMSText, int $MessageType): void
     {
+        if ($this->CheckMaintenanceMode()) {
+            return;
+        }
         $this->SendPushNotification($PushTitle, $PushText, $MessageType);
         $this->SendEMailNotification($EmailSubject, $EmailText, $MessageType);
         $this->SendSMSNotification($SMSText, $MessageType);
@@ -32,6 +37,9 @@ trait BENA_notifications
      */
     public function RepeatAlarmNotification(): void
     {
+        if ($this->CheckMaintenanceMode()) {
+            return;
+        }
         $actualAttempts = $this->ReadAttributeInteger('AlarmNotificationAttempt');
         $actualAttempts++;
         $definedAttempts = $this->ReadPropertyInteger('AlarmNotificationAttempts');
@@ -53,6 +61,9 @@ trait BENA_notifications
      */
     public function ConfirmAlarmNotification(): void
     {
+        if ($this->CheckMaintenanceMode()) {
+            return;
+        }
         // Deactivate timers
         $this->DeactivateTimers();
 
@@ -74,6 +85,9 @@ trait BENA_notifications
      */
     public function SendPushNotification(string $Title, string $Text, int $MessageType): void
     {
+        if ($this->CheckMaintenanceMode()) {
+            return;
+        }
         $Title = substr($Title, 0, 32);
         $webFronts = json_decode($this->ReadPropertyString('WebFronts'));
         if (!empty($webFronts)) {
@@ -154,6 +168,9 @@ trait BENA_notifications
      */
     public function SendEMailNotification(string $Subject, string $Text, int $MessageType): void
     {
+        if ($this->CheckMaintenanceMode()) {
+            return;
+        }
         $recipients = json_decode($this->ReadPropertyString('MailRecipients'));
         if (!empty($recipients)) {
             foreach ($recipients as $recipient) {
@@ -218,6 +235,9 @@ trait BENA_notifications
      */
     public function SendSMSNotification(string $Text, int $MessageType): void
     {
+        if ($this->CheckMaintenanceMode()) {
+            return;
+        }
         $recipients = json_decode($this->ReadPropertyString('SMSRecipients'));
         if (!empty($recipients)) {
             foreach ($recipients as $recipient) {

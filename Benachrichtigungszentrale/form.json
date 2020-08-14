@@ -2,7 +2,7 @@
   "elements": [
     {
       "type": "ExpansionPanel",
-      "caption": "Instanzinformationen",
+      "caption": "Benachrichtigungszentrale",
       "items": [
         {
           "type": "Image",
@@ -10,39 +10,50 @@
         },
         {
           "type": "Label",
-          "caption": "Ein Gemeinschaftsprojekt von Normen Thiel und Ulrich Bittner\n"
+          "caption": "Ein Gemeinschaftsprojekt von Normen Thiel und Ulrich Bittner\n\nMit dieser Instanz kann eine Benachrichtigung versendet werden.\nWeitere Informationen entnehmen Sie bitte der Dokumentation.\n\n"
         },
         {
           "type": "Label",
-          "caption": "Mit dieser Instanz kann eine Benachrichtigung versendet werden.\nWeitere Informationen entnehmen Sie bitte der Dokumentation.\n"
+          "caption": "Instanz ID:"
         },
         {
           "type": "Label",
-          "caption": "Symcon Version:\t5.1>"
+          "caption": "Modul:"
         },
         {
           "type": "Label",
-          "caption": "Name:\t\t\tBenachrichtigungszentrale"
+          "caption": "Version:"
         },
         {
           "type": "Label",
-          "caption": "Version:\t\t\t4.00-5"
+          "caption": "Datum:"
         },
         {
           "type": "Label",
-          "caption": "Datum:\t\t\t30. Januar 2020"
+          "caption": "Uhrzeit:"
         },
         {
           "type": "Label",
-          "caption": "Uhrzeit:\t\t\t18:00"
+          "caption": "Entwickler:"
         },
         {
           "type": "Label",
-          "caption": "Entwickler:\t\tUlrich Bittner"
+          "caption": "Präfix:"
+        },
+        {
+          "type": "ValidationTextBox",
+          "name": "Note",
+          "caption": "Notiz",
+          "width": "600px"
         },
         {
           "type": "Label",
-          "caption": "Präfix:\t\t\tBENA"
+          "caption": " "
+        },
+        {
+          "type": "CheckBox",
+          "name": "MaintenanceMode",
+          "caption": "Wartungsmodus"
         }
       ]
     },
@@ -614,7 +625,7 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "E-Mail Benachrichtigung",
+      "caption": "E-Mail",
       "items": [
         {
           "type": "Label",
@@ -715,11 +726,11 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "SMS Benachrichtigung",
+      "caption": "SMS",
       "items": [
         {
           "type": "Label",
-          "caption": "Bitte geben Sie den Token an:"
+          "caption": "Bitte geben Sie den Nexxt Mobile Token an:"
         },
         {
           "type": "PasswordTextBox",
@@ -825,6 +836,66 @@
     }
   ],
   "actions": [
+    {
+      "type": "ExpansionPanel",
+      "caption": "Konfiguration",
+      "items": [
+        {
+          "type": "Button",
+          "caption": "Neu einlesen",
+          "onClick": "BENA_ReloadConfiguration($id);"
+        },
+        {
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "SelectCategory",
+              "name": "BackupCategory",
+              "caption": "Kategorie",
+              "width": "600px"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "Button",
+              "caption": "Sichern",
+              "onClick": "BENA_CreateBackup($id, $BackupCategory);"
+            }
+          ]
+        },
+        {
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "SelectScript",
+              "name": "ConfigurationScript",
+              "caption": "Konfigurationsskript",
+              "width": "600px"
+            },
+            {
+              "type": "Label",
+              "caption": " "
+            },
+            {
+              "type": "PopupButton",
+              "caption": "Wiederherstellen",
+              "popup": {
+                "caption": "Konfiguration wirklich wiederherstellen?",
+                "items": [
+                  {
+                    "type": "Button",
+                    "caption": "Wiederherstellen",
+                    "onClick": "BENA_RestoreConfiguration($id, $ConfigurationScript);"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
     {
       "type": "ExpansionPanel",
       "caption": "Testnachricht",

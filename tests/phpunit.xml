@@ -6,6 +6,7 @@
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">../Benachrichtigungszentrale</directory>
+            <directory suffix=".php">../Benachrichtigungszentrale 1</directory>
         </whitelist>
     </filter>
 </phpunit>

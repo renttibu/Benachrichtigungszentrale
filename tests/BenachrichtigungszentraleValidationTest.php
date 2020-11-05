@@ -8,8 +8,14 @@ class BenachrichtigungszentraleValidationTest extends TestCaseSymconValidation
     {
         $this->validateLibrary(__DIR__ . '/..');
     }
+
     public function testValidateBenachrichtigungszentraleModule(): void
     {
         $this->validateModule(__DIR__ . '/../Benachrichtigungszentrale');
+    }
+
+    public function testValidateBenachrichtigungszentrale1Module(): void
+    {
+        $this->validateModule(__DIR__ . '/../Benachrichtigungszentrale 1');
     }
 }

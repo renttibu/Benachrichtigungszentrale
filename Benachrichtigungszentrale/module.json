@@ -1,8 +1,8 @@
 {
-  "id": "{D184C522-507F-BED6-6731-728CE156D659}",
+  "id": "{0A9D7D1E-286F-BC3C-F162-7622A53EBE5A}",
   "name": "Benachrichtigungszentrale",
   "type": 3,
-  "vendor": "NTUB",
+  "vendor": "Ulrich Bittner",
   "aliases": [
     "Benachrichtigungszentrale"
   ],
@@ -10,5 +10,5 @@
   "parentRequirements": [],
   "childRequirements": [],
   "implemented": [],
-  "prefix": "BENA"
+  "prefix": "BZ"
 }

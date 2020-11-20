@@ -1,11 +1,26 @@
 <?php
 
 /** @noinspection PhpUnused */
-/** @noinspection DuplicatedCode */
+
+/*
+ * @module      Benachrichtigungszentrale
+ *
+ * @prefix      BZ
+ *
+ * @file        BZ_backupRestore.php
+ *
+ * @author      Ulrich Bittner
+ * @copyright   (c) 2020
+ * @license    	CC BY-NC-SA 4.0
+ *              https://creativecommons.org/licenses/by-nc-sa/4.0/
+ *
+ * @see         https://github.com/ubittner/Benachrichtigungszentrale/
+ *
+ */
 
 declare(strict_types=1);
 
-trait BZ1_backupRestore
+trait BZ_backupRestore
 {
     #################### Backup
 
@@ -19,7 +34,6 @@ trait BZ1_backupRestore
         if (IPS_GetInstance($this->InstanceID)['InstanceStatus'] == 102) {
             $name = 'Konfiguration (' . IPS_GetName($this->InstanceID) . ' #' . $this->InstanceID . ') ' . date('d.m.Y H:i:s');
             $config = IPS_GetConfiguration($this->InstanceID);
-            // Create backup
             $content = "<?php\n// Backup " . date('d.m.Y, H:i:s') . "\n// " . $this->InstanceID . "\n$" . "config = '" . $config . "';";
             $backupScript = IPS_CreateScript(0);
             IPS_SetParent($backupScript, $BackupCategory);

@@ -2,54 +2,8 @@
   "elements": [
     {
       "type": "ExpansionPanel",
-      "caption": "Benachrichtigungszentrale",
+      "caption": "Funktion",
       "items": [
-        {
-          "type": "Image",
-          "image": "data:image/png;base64,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"
-        },
-        {
-          "type": "Label",
-          "caption": "Ein Gemeinschaftsprojekt von Normen Thiel und Ulrich Bittner\n\nMit dieser Instanz kann eine Benachrichtigung versendet werden.\nWeitere Informationen entnehmen Sie bitte der Dokumentation.\n\n"
-        },
-        {
-          "type": "Label",
-          "caption": "Instanz ID:"
-        },
-        {
-          "type": "Label",
-          "caption": "Modul:"
-        },
-        {
-          "type": "Label",
-          "caption": "Version:"
-        },
-        {
-          "type": "Label",
-          "caption": "Datum:"
-        },
-        {
-          "type": "Label",
-          "caption": "Uhrzeit:"
-        },
-        {
-          "type": "Label",
-          "caption": "Entwickler:"
-        },
-        {
-          "type": "Label",
-          "caption": "Präfix:"
-        },
-        {
-          "type": "ValidationTextBox",
-          "name": "Note",
-          "caption": "Notiz",
-          "width": "600px"
-        },
-        {
-          "type": "Label",
-          "caption": " "
-        },
         {
           "type": "CheckBox",
           "name": "MaintenanceMode",
@@ -59,16 +13,16 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "Push Benachrichtigung",
+      "caption": "Push Benachrichtigung (WebFront)",
       "items": [
         {
-          "type": "Label",
-          "caption": "Bitte fügen Sie die WebFronts hinzu:"
+          "type": "CheckBox",
+          "name": "UsePushNotification",
+          "caption": "Aktiv"
         },
         {
           "type": "List",
           "name": "WebFronts",
-          "caption": "WebFronts",
           "rowCount": 3,
           "add": true,
           "delete": true,
@@ -83,12 +37,13 @@
               }
             },
             {
-              "caption": "WebFront",
+              "caption": "WebFront Instanz",
               "name": "ID",
-              "width": "350px",
               "add": 0,
+              "width": "350px",
               "edit": {
-                "type": "SelectInstance"
+                "type": "SelectModule",
+                "moduleID": "{3565B1F2-8F7B-4311-A4B6-1BF1D868F39E}"
               }
             },
             {
@@ -594,47 +549,35 @@
           ]
         },
         {
-          "type": "Label",
-          "caption": "\nBitte wählen Sie aus, ob eine Alarmmeldung durch den Anwender quittiert werden muss:"
-        },
-        {
           "type": "CheckBox",
-          "name": "ConfirmAlarmNotification",
-          "caption": "Quittierung erforderlich"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie den Zeitraum in Sekunden an, indem die Quittierung durch den Anwender erfolgen muss."
+          "name": "ConfirmAlarmMessage",
+          "caption": "Alarmnachricht quittieren"
         },
         {
           "type": "NumberSpinner",
-          "name": "RepeatAlarmNotificationDurationTime",
-          "caption": "Zeitraum",
-          "suffix": "s"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie die maximale Anzahl der Zustellungen an, wenn keine Quittierung im vorgegebenen Zeitraum erfolgt ist."
+          "name": "ConfirmationPeriod",
+          "caption": "Quittierungszeitraum",
+          "suffix": "Sekunden"
         },
         {
           "type": "NumberSpinner",
           "name": "AlarmNotificationAttempts",
-          "caption": "Anzahl der Zustellungen"
+          "caption": "Benachrichtigungsversuche"
         }
       ]
     },
     {
       "type": "ExpansionPanel",
-      "caption": "E-Mail",
+      "caption": "E-Mail (SMTP)",
       "items": [
         {
-          "type": "Label",
-          "caption": "Bitte fügen Sie die E-Mail Empfänger hinzu:"
+          "type": "CheckBox",
+          "name": "UseSMTPNotification",
+          "caption": "Aktiv"
         },
         {
           "type": "List",
-          "name": "MailRecipients",
-          "caption": "E-Mail Empfänger",
+          "name": "SMTPRecipients",
           "rowCount": 5,
           "add": true,
           "delete": true,
@@ -649,16 +592,17 @@
               }
             },
             {
-              "caption": "SMTP",
+              "caption": "SMTP Instanz",
               "name": "ID",
-              "width": "350px",
               "add": 0,
+              "width": "350px",
               "edit": {
-                "type": "SelectInstance"
+                "type": "SelectModule",
+                "moduleID": "{375EAF21-35EF-4BC4-83B3-C780FD8BD88A}"
               }
             },
             {
-              "caption": "Name des Empfängers",
+              "caption": "Empfänger",
               "name": "Name",
               "width": "350px",
               "add": "",
@@ -726,34 +670,35 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "SMS",
+      "caption": "SMS (Nexxt Mobile)",
       "items": [
         {
-          "type": "Label",
-          "caption": "Bitte geben Sie den Nexxt Mobile Token an:"
+          "type": "CheckBox",
+          "name": "UseNexxtMobile",
+          "caption": "Aktiv"
         },
         {
           "type": "PasswordTextBox",
-          "name": "SMSToken",
-          "caption": "Token"
-        },
-        {
-          "type": "Label",
-          "caption": "\nBitte geben Sie die Rufnummer des Absenders an:"
+          "name": "NexxtMobileToken",
+          "caption": "Token",
+          "width": "600px"
         },
         {
           "type": "ValidationTextBox",
-          "name": "SMSOriginator",
-          "caption": "Rufnummer des Absenders"
+          "name": "NexxtMobileSenderPhoneNumber",
+          "caption": "Absendernummer",
+          "width": "600px"
         },
         {
-          "type": "Label",
-          "caption": "\nBitte fügen Sie die SMS Empfänger hinzu:"
+          "type": "NumberSpinner",
+          "name": "NexxtMobileTimeout",
+          "caption": "Timeout",
+          "suffix": "Millisekunden",
+          "minimum": 0
         },
         {
           "type": "List",
-          "name": "SMSRecipients",
-          "caption": "SMS Empfänger",
+          "name": "NexxtMobileRecipients",
           "rowCount": 5,
           "add": true,
           "delete": true,
@@ -768,7 +713,7 @@
               }
             },
             {
-              "caption": "Name des Empfängers",
+              "caption": "Empfänger",
               "name": "Name",
               "width": "350px",
               "add": "",
@@ -777,7 +722,118 @@
               }
             },
             {
-              "caption": "Rufnummer des Empfängers",
+              "caption": "Rufnummer",
+              "name": "PhoneNumber",
+              "width": "350px",
+              "add": "+49",
+              "edit": {
+                "type": "ValidationTextBox"
+              }
+            },
+            {
+              "caption": "Standardnachricht",
+              "name": "Notification",
+              "width": "230px",
+              "add": true,
+              "edit": {
+                "type": "CheckBox"
+              }
+            },
+            {
+              "caption": "Bestätigungsnachricht",
+              "name": "Acknowledgement",
+              "width": "230px",
+              "add": true,
+              "edit": {
+                "type": "CheckBox"
+              }
+            },
+            {
+              "caption": "Alarmnachricht",
+              "name": "Alerting",
+              "width": "230px",
+              "add": true,
+              "edit": {
+                "type": "CheckBox"
+              }
+            },
+            {
+              "caption": "Sabotagenachricht",
+              "name": "Sabotage",
+              "width": "230px",
+              "add": true,
+              "edit": {
+                "type": "CheckBox"
+              }
+            },
+            {
+              "caption": "Batterienachricht",
+              "name": "Battery",
+              "width": "230px",
+              "add": true,
+              "edit": {
+                "type": "CheckBox"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ExpansionPanel",
+      "caption": "SMS (Sipgate)",
+      "items": [
+        {
+          "type": "CheckBox",
+          "name": "UseSipgate",
+          "caption": "Aktiv"
+        },
+        {
+          "type": "ValidationTextBox",
+          "name": "SipgateUser",
+          "caption": "Benutzer",
+          "width": "600px"
+        },
+        {
+          "type": "PasswordTextBox",
+          "name": "SipgatePassword",
+          "caption": "Kennwort",
+          "width": "600px"
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "SipgateTimeout",
+          "caption": "Timeout",
+          "suffix": "Millisekunden",
+          "minimum": 0
+        },
+        {
+          "type": "List",
+          "name": "SipgateRecipients",
+          "rowCount": 5,
+          "add": true,
+          "delete": true,
+          "columns": [
+            {
+              "caption": "Aktiviert",
+              "name": "Use",
+              "width": "100px",
+              "add": true,
+              "edit": {
+                "type": "CheckBox"
+              }
+            },
+            {
+              "caption": "Empfänger",
+              "name": "Name",
+              "width": "350px",
+              "add": "",
+              "edit": {
+                "type": "ValidationTextBox"
+              }
+            },
+            {
+              "caption": "Rufnummer",
               "name": "PhoneNumber",
               "width": "350px",
               "add": "+49",
@@ -843,7 +899,7 @@
         {
           "type": "Button",
           "caption": "Neu einlesen",
-          "onClick": "BENA_ReloadConfiguration($id);"
+          "onClick": "BZ_ReloadConfiguration($id);"
         },
         {
           "type": "RowLayout",
@@ -861,7 +917,7 @@
             {
               "type": "Button",
               "caption": "Sichern",
-              "onClick": "BENA_CreateBackup($id, $BackupCategory);"
+              "onClick": "BZ_CreateBackup($id, $BackupCategory);"
             }
           ]
         },
@@ -871,7 +927,7 @@
             {
               "type": "SelectScript",
               "name": "ConfigurationScript",
-              "caption": "Konfigurationsskript",
+              "caption": "Konfiguration",
               "width": "600px"
             },
             {
@@ -887,7 +943,7 @@
                   {
                     "type": "Button",
                     "caption": "Wiederherstellen",
-                    "onClick": "BENA_RestoreConfiguration($id, $ConfigurationScript);"
+                    "onClick": "BZ_RestoreConfiguration($id, $ConfigurationScript);"
                   }
                 ]
               }
@@ -898,32 +954,32 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "Testnachricht",
+      "caption": "Testnachrichten",
       "items": [
         {
           "type": "Button",
-          "caption": "Standardnachricht versenden",
-          "onClick": "BENA_SendNotification($id, 'Standardnachricht', 'Dies ist eine Standardnachricht', 'Benachrichtungszentrale', 'Dies ist eine Standardnachricht', 'Dies ist eine Standardnachricht', 0);"
+          "caption": "Standardnachricht",
+          "onClick": "BZ_SendNotification($id, 'Standardnachricht', 'Dies ist eine Standardnachricht öäüß!$@', 'Benachrichtungszentrale', 'Dies ist eine Standardnachricht öäüß!$@', 'Dies ist eine Standardnachricht öäüß!$@', 0);"
         },
         {
           "type": "Button",
-          "caption": "Bestätigungsnachricht versenden",
-          "onClick": "BENA_SendNotification($id, 'Bestätigungsnachricht', 'Dies ist eine Bestätigungsnachricht', 'Benachrichtungszentrale', 'Dies ist eine Bestätigungsnachricht', 'Dies ist eine Bestätigungsnachricht', 1);"
+          "caption": "Bestätigungsnachricht",
+          "onClick": "BZ_SendNotification($id, 'Bestätigungsnachricht', 'Dies ist eine Bestätigungsnachricht', 'Benachrichtungszentrale', 'Dies ist eine Bestätigungsnachricht', 'Dies ist eine Bestätigungsnachricht', 1);"
         },
         {
           "type": "Button",
-          "caption": "Alarmnachricht versenden",
-          "onClick": "BENA_SendNotification($id, 'Alarmnachricht', 'Dies ist eine Alarmnachricht', 'Benachrichtungszentrale', 'Dies ist eine Alarmnachricht', 'Dies ist eine Alarmnachricht', 2);"
+          "caption": "Alarmnachricht",
+          "onClick": "BZ_SendNotification($id, 'Alarmnachricht', 'Dies ist eine Alarmnachricht', 'Benachrichtungszentrale', 'Dies ist eine Alarmnachricht', 'Dies ist eine Alarmnachricht', 2);"
         },
         {
           "type": "Button",
-          "caption": "Sabotagenachricht versenden",
-          "onClick": "BENA_SendNotification($id, 'Sabotagenachricht', 'Dies ist eine Sabotagenachricht', 'Benachrichtungszentrale', 'Dies ist eine Sabotagenachricht', 'Dies ist eine Sabotagenachricht', 3);"
+          "caption": "Sabotagenachricht",
+          "onClick": "BZ_SendNotification($id, 'Sabotagenachricht', 'Dies ist eine Sabotagenachricht', 'Benachrichtungszentrale', 'Dies ist eine Sabotagenachricht', 'Dies ist eine Sabotagenachricht', 3);"
         },
         {
           "type": "Button",
-          "caption": "Batterienachricht versenden",
-          "onClick": "BENA_SendNotification($id, 'Batterienachricht', 'Dies ist eine Batterienachricht', 'Benachrichtungszentrale', 'Dies ist eine Batterienachricht', 'Dies ist eine Batterienachricht', 4);"
+          "caption": "Batterienachricht",
+          "onClick": "BZ_SendNotification($id, 'Batterienachricht', 'Dies ist eine Batterienachricht', 'Benachrichtungszentrale', 'Dies ist eine Batterienachricht', 'Dies ist eine Batterienachricht', 4);"
         }
       ]
     }
@@ -952,7 +1008,7 @@
     {
       "code": 200,
       "icon": "inactive",
-      "caption": "Es ist Fehler aufgetreten, weitere Informationen unter Meldungen oder im Log"
+      "caption": "Es ist Fehler aufgetreten, weitere Informationen unter Meldungen, im Log oder Debug"
     }
   ]
 }

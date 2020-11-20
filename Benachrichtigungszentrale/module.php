@@ -1,12 +1,11 @@
 <?php
 
-/** @noinspection DuplicatedCode */
 /** @noinspection PhpUnused */
 
 /*
  * @module      Benachrichtigungszentrale
  *
- * @prefix      BENA
+ * @prefix      BZ
  *
  * @file        module.php
  *
@@ -15,35 +14,23 @@
  * @license    	CC BY-NC-SA 4.0
  *              https://creativecommons.org/licenses/by-nc-sa/4.0/
  *
- * @see         https://github.com/ubittner/Alarmierungssystem/
+ * @see         https://github.com/ubittner/Benachrichtigungszentrale/
  *
- * @guids       Library
- *              {1961CDAF-8BEC-D073-B0E3-F793432E0628}
- *
- *              Benachrichtigungszentrale
- *             	{D184C522-507F-BED6-6731-728CE156D659}
  */
 
 declare(strict_types=1);
 
-// Include
 include_once __DIR__ . '/helper/autoload.php';
 
 class Benachrichtigungszentrale extends IPSModule
 {
-    // Helper
-    use BENA_backupRestore;
-    use BENA_notifications;
-
-    // Constants
-    private const BENACHRICHTIGUNGSZENTRALE_LIBRARY_GUID = '{1961CDAF-8BEC-D073-B0E3-F793432E0628}';
-    private const BENACHRICHTIGUNGSZENTRALE_MODULE_GUID = '{D184C522-507F-BED6-6731-728CE156D659}';
-    private const WEBFRONT_MODULE_GUID = '{3565B1F2-8F7B-4311-A4B6-1BF1D868F39E}';
-    private const SMTP_MODULE_GUID = '{375EAF21-35EF-4BC4-83B3-C780FD8BD88A}';
+    //Helper
+    use BZ_backupRestore;
+    use BZ_notifications;
 
     public function Create()
     {
-        // Never delete this line!
+        //Never delete this line!
         parent::Create();
         $this->RegisterProperties();
         $this->RegisterTimers();
@@ -53,27 +40,20 @@ class Benachrichtigungszentrale extends IPSModule
 
     public function ApplyChanges()
     {
-        // Wait until IP-Symcon is started
+        //Wait until IP-Symcon is started
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
-        // Never delete this line!
+        //Never delete this line!
         parent::ApplyChanges();
-        // Check runlevel
+        //Check runlevel
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
         $this->ValidateConfiguration();
-        $this->CheckMaintenanceMode();
     }
 
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
-        // Send debug
         $this->SendDebug('MessageSink', 'Message from SenderID ' . $SenderID . ' with Message ' . $Message . "\r\n Data: " . print_r($Data, true), 0);
-        if (!empty($Data)) {
-            foreach ($Data as $key => $value) {
-                $this->SendDebug(__FUNCTION__, 'Data[' . $key . '] = ' . json_encode($value), 0);
-            }
-        }
         switch ($Message) {
             case IPS_KERNELSTARTED:
                 $this->KernelReady();
@@ -85,21 +65,6 @@ class Benachrichtigungszentrale extends IPSModule
     public function GetConfigurationForm()
     {
         $formData = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        $moduleInfo = [];
-        $library = IPS_GetLibrary(self::BENACHRICHTIGUNGSZENTRALE_LIBRARY_GUID);
-        $module = IPS_GetModule(self::BENACHRICHTIGUNGSZENTRALE_MODULE_GUID);
-        $moduleInfo['name'] = $module['ModuleName'];
-        $moduleInfo['version'] = $library['Version'] . '-' . $library['Build'];
-        $moduleInfo['date'] = date('d.m.Y', $library['Date']);
-        $moduleInfo['time'] = date('H:i', $library['Date']);
-        $moduleInfo['developer'] = $library['Author'];
-        $formData['elements'][0]['items'][2]['caption'] = "Instanz ID:\t\t" . $this->InstanceID;
-        $formData['elements'][0]['items'][3]['caption'] = "Modul:\t\t\t" . $moduleInfo['name'];
-        $formData['elements'][0]['items'][4]['caption'] = "Version:\t\t\t" . $moduleInfo['version'];
-        $formData['elements'][0]['items'][5]['caption'] = "Datum:\t\t\t" . $moduleInfo['date'];
-        $formData['elements'][0]['items'][6]['caption'] = "Uhrzeit:\t\t\t" . $moduleInfo['time'];
-        $formData['elements'][0]['items'][7]['caption'] = "Entwickler:\t\t" . $moduleInfo['developer'];
-        $formData['elements'][0]['items'][8]['caption'] = "Präfix:\t\t\tBENA";
         return json_encode($formData);
     }
 
@@ -110,31 +75,41 @@ class Benachrichtigungszentrale extends IPSModule
 
     #################### Private
 
-    private function KernelReady()
+    private function KernelReady(): void
     {
         $this->ApplyChanges();
     }
 
     private function RegisterProperties(): void
     {
-        $this->RegisterPropertyString('Note', '');
+        //Functions
         $this->RegisterPropertyBoolean('MaintenanceMode', false);
-        // Push notification
+        //Push notification (WebFront)
+        $this->RegisterPropertyBoolean('UsePushNotification', false);
         $this->RegisterPropertyString('WebFronts', '[]');
-        $this->RegisterPropertyBoolean('ConfirmAlarmNotification', false);
-        $this->RegisterPropertyInteger('RepeatAlarmNotificationDurationTime', 60);
+        $this->RegisterPropertyBoolean('ConfirmAlarmMessage', false);
+        $this->RegisterPropertyInteger('ConfirmationPeriod', 60);
         $this->RegisterPropertyInteger('AlarmNotificationAttempts', 3);
-        // E-Mail notification
-        $this->RegisterPropertyString('MailRecipients', '[]');
-        // SMS notification
-        $this->RegisterPropertyString('SMSToken', '');
-        $this->RegisterPropertyString('SMSOriginator', '');
-        $this->RegisterPropertyString('SMSRecipients', '[]');
+        //E-Mail (SMTP) notification
+        $this->RegisterPropertyBoolean('UseSMTPNotification', false);
+        $this->RegisterPropertyString('SMTPRecipients', '[]');
+        //SMS (NeXXt Mobile) notification
+        $this->RegisterPropertyBoolean('UseNexxtMobile', false);
+        $this->RegisterPropertyString('NexxtMobileToken', '');
+        $this->RegisterPropertyString('NexxtMobileSenderPhoneNumber', '');
+        $this->RegisterPropertyInteger('NexxtMobileTimeout', 5000);
+        $this->RegisterPropertyString('NexxtMobileRecipients', '[]');
+        //SMS (Sipgate) notification
+        $this->RegisterPropertyBoolean('UseSipgate', false);
+        $this->RegisterPropertyString('SipgateUser', '');
+        $this->RegisterPropertyString('SipgatePassword', '');
+        $this->RegisterPropertyInteger('SipgateTimeout', 5000);
+        $this->RegisterPropertyString('SipgateRecipients', '[]');
     }
 
     private function RegisterTimers(): void
     {
-        $this->RegisterTimer('RepeatAlarmNotification', 0, 'BENA_RepeatAlarmNotification(' . $this->InstanceID . ');');
+        $this->RegisterTimer('RepeatAlarmNotification', 0, 'BZ_RepeatAlarmNotification(' . $this->InstanceID . ');');
     }
 
     private function DeactivateTimers(): void
@@ -158,107 +133,134 @@ class Benachrichtigungszentrale extends IPSModule
 
     private function RegisterScripts(): void
     {
-        $this->RegisterScript('ConfirmAlarmNotification', 'Alarmquittierung', "<?php BENA_ConfirmAlarmNotification(IPS_GetParent(\$_IPS['SELF']));");
+        $this->RegisterScript('ConfirmAlarmNotification', 'Alarmquittierung', "<?php BZ_ConfirmAlarmNotification(IPS_GetParent(\$_IPS['SELF']));");
         $resetScript = $this->GetIDForIdent('ConfirmAlarmNotification');
         IPS_SetPosition($resetScript, 10);
         IPS_SetHidden($resetScript, true);
     }
 
-    private function ValidateConfiguration(): void
+    private function ValidateConfiguration(): bool
     {
-        $state = 102;
-        // Push notification
-        $webFronts = json_decode($this->ReadPropertyString('WebFronts'));
-        if (!empty($webFronts)) {
-            foreach ($webFronts as $webFront) {
-                if ($webFront->Use) {
-                    $id = $webFront->ID;
-                    if ($id != 0) {
-                        if (!@IPS_ObjectExists($id)) {
-                            $this->LogMessage('Instanzkonfiguration, Push Benachrichtigung, WebFront ID ungültig!', KL_ERROR);
-                            $state = 200;
-                        } else {
-                            $instance = IPS_GetInstance($id);
-                            $moduleID = $instance['ModuleInfo']['ModuleID'];
-                            if ($moduleID !== self::WEBFRONT_MODULE_GUID) {
-                                $this->LogMessage('Instanzkonfiguration,, Push Benachrichtigung, WebFront GUID ungültig!', KL_ERROR);
-                                $state = 200;
-                            }
+        $result = true;
+        $status = 102;
+        //Push notification
+        if ($this->ReadPropertyBoolean('UsePushNotification')) {
+            $webFronts = json_decode($this->ReadPropertyString('WebFronts'));
+            if (!empty($webFronts)) {
+                foreach ($webFronts as $webFront) {
+                    if ($webFront->Use) {
+                        $id = $webFront->ID;
+                        if ($id == 0 || !@IPS_ObjectExists($id)) {
+                            $status = 200;
+                            $text = 'Bitte die zugewiesenen WebFront Instanzen überprüfen!';
+                            $this->SendDebug(__FUNCTION__, $text, 0);
+                            $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', ' . $text, KL_WARNING);
                         }
-                    } else {
-                        $this->LogMessage('Instanzkonfiguration, Push Benachrichtigung, Kein WebFront ausgewählt!', KL_ERROR);
-                        $state = 200;
                     }
                 }
             }
         }
-        // E-Mail recipients
-        $recipients = json_decode($this->ReadPropertyString('MailRecipients'));
-        if (!empty($recipients)) {
-            foreach ($recipients as $recipient) {
-                if ($recipient->Use) {
-                    $id = $recipient->ID;
-                    if ($id != 0) {
-                        if (!@IPS_ObjectExists($id)) {
-                            $this->LogMessage('Instanzkonfiguration, E-Mail Benachrichtigung, SMTP ID ungültig!', KL_ERROR);
-                            $state = 200;
-                        } else {
-                            $instance = IPS_GetInstance($id);
-                            $moduleID = $instance['ModuleInfo']['ModuleID'];
-                            if ($moduleID !== self::SMTP_MODULE_GUID) {
-                                $this->LogMessage('Instanzkonfiguration,, E-Mail Benachrichtigung, SMTP GUID ungültig!', KL_ERROR);
-                                $state = 200;
-                            }
+        //E-Mail recipients
+        if ($this->ReadPropertyBoolean('UseSMTPNotification')) {
+            $recipients = json_decode($this->ReadPropertyString('SMTPRecipients'));
+            if (!empty($recipients)) {
+                foreach ($recipients as $recipient) {
+                    if ($recipient->Use) {
+                        $id = $recipient->ID;
+                        if ($id == 0 || !@IPS_ObjectExists($id)) {
+                            $status = 200;
+                            $text = 'Bitte die zugewiesenen SMTP Instanzen überprüfen!';
+                            $this->SendDebug(__FUNCTION__, $text, 0);
+                            $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', ' . $text, KL_WARNING);
                         }
-                    } else {
-                        $this->LogMessage('Instanzkonfiguration, E-Mail Benachrichtigung, Keine SMTP Instanz ausgewählt!', KL_ERROR);
-                        $state = 200;
-                    }
-                    $address = $recipient->Address;
-                    if (empty($address) || strlen($address) < 3) {
-                        $this->LogMessage('Instanzkonfiguration,, E-Mail Benachrichtigung, Empfängeradresse zu kurz!', KL_ERROR);
-                        $state = 200;
-                    }
-                }
-            }
-        }
-        // SMS notification
-        $recipients = json_decode($this->ReadPropertyString('SMSRecipients'));
-        if (!empty($recipients)) {
-            foreach ($recipients as $recipient) {
-                if ($recipient->Use) {
-                    if (empty($this->ReadPropertyString('SMSToken'))) {
-                        $this->LogMessage('Instanzkonfiguration, SMS Benachrichtigung, Token nicht angegeben!', KL_ERROR);
-                        $state = 200;
-                    }
-                    if (empty($this->ReadPropertyString('SMSOriginator'))) {
-                        $this->LogMessage('Instanzkonfiguration, SMS Benachrichtigung, Absenderrufnummer nicht angegeben!', KL_ERROR);
-                        $state = 200;
-                    }
-                    $phoneNumber = $recipient->PhoneNumber;
-                    if (empty($phoneNumber) || strlen($phoneNumber) < 3) {
-                        $this->LogMessage('Instanzkonfiguration, SMS Benachrichtigung, Empfängerrufnummer zu kurz!', KL_ERROR);
-                        $state = 200;
+                        $address = $recipient->Address;
+                        if (empty($address) || strlen($address) < 3) {
+                            $status = 200;
+                            $text = 'Bitte die zugewiesenen E-Mail Empfänger überprüfen!';
+                            $this->SendDebug(__FUNCTION__, $text, 0);
+                            $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', ' . $text, KL_WARNING);
+                        }
                     }
                 }
             }
         }
-        // Set state
-        $this->SetStatus($state);
+        //SMS (NeXXt mobile) notification
+        if ($this->ReadPropertyBoolean('UseNexxtMobile')) {
+            $recipients = json_decode($this->ReadPropertyString('NexxtMobileRecipients'));
+            if (!empty($recipients)) {
+                foreach ($recipients as $recipient) {
+                    if ($recipient->Use) {
+                        if (empty($this->ReadPropertyString('NexxtMobileToken'))) {
+                            $status = 200;
+                            $text = 'Bitte den angegebenen NeXXt Mobile Token überprüfen!';
+                            $this->SendDebug(__FUNCTION__, $text, 0);
+                            $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', ' . $text, KL_WARNING);
+                        }
+                        if (empty($this->ReadPropertyString('NexxtMobileSenderPhoneNumber'))) {
+                            $status = 200;
+                            $text = 'Bitte die angegebene NeXXt Mobile Absender Rufnummer überprüfen!';
+                            $this->SendDebug(__FUNCTION__, $text, 0);
+                            $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', ' . $text, KL_WARNING);
+                        }
+                        $phoneNumber = $recipient->PhoneNumber;
+                        if (empty($phoneNumber) || strlen($phoneNumber) < 3) {
+                            $status = 200;
+                            $text = 'Bitte die angegebenen NeXXt Mobile  Empfänger Rufnummern überprüfen!';
+                            $this->SendDebug(__FUNCTION__, $text, 0);
+                            $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', ' . $text, KL_WARNING);
+                        }
+                    }
+                }
+            }
+        }
+        if ($this->ReadPropertyBoolean('UseSipgate')) {
+            $recipients = json_decode($this->ReadPropertyString('SipgateRecipients'));
+            if (!empty($recipients)) {
+                foreach ($recipients as $recipient) {
+                    if ($recipient->Use) {
+                        if (empty($this->ReadPropertyString('SipgateUser'))) {
+                            $status = 200;
+                            $text = 'Bitte den angegebenen sipgate Benutzer überprüfen!';
+                            $this->SendDebug(__FUNCTION__, $text, 0);
+                            $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', ' . $text, KL_WARNING);
+                        }
+                        if (empty($this->ReadPropertyString('SipgatePassword'))) {
+                            $status = 200;
+                            $text = 'Bitte das angegebenen sipgate Kennwort überprüfen!';
+                            $this->SendDebug(__FUNCTION__, $text, 0);
+                            $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', ' . $text, KL_WARNING);
+                        }
+                        $phoneNumber = $recipient->PhoneNumber;
+                        if (empty($phoneNumber) || strlen($phoneNumber) < 3) {
+                            $status = 200;
+                            $text = 'Bitte die angegebenen sipgate Empfänger Rufnummern überprüfen!';
+                            $this->SendDebug(__FUNCTION__, $text, 0);
+                            $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', ' . $text, KL_WARNING);
+                        }
+                    }
+                }
+            }
+        }
+        //Maintenance mode
+        $maintenance = $this->CheckMaintenanceMode();
+        if ($maintenance) {
+            $status = 104;
+        }
+        IPS_SetDisabled($this->InstanceID, $maintenance);
+        $this->SetStatus($status);
+        if ($status != 102) {
+            $result = false;
+        }
+        return $result;
     }
 
     private function CheckMaintenanceMode(): bool
     {
-        $result = false;
-        $status = 102;
-        if ($this->ReadPropertyBoolean('MaintenanceMode')) {
-            $result = true;
-            $status = 104;
+        $result = $this->ReadPropertyBoolean('MaintenanceMode');
+        if ($result) {
             $this->SendDebug(__FUNCTION__, 'Abbruch, der Wartungsmodus ist aktiv!', 0);
             $this->LogMessage('ID ' . $this->InstanceID . ', ' . __FUNCTION__ . ', Abbruch, der Wartungsmodus ist aktiv!', KL_WARNING);
         }
-        $this->SetStatus($status);
-        IPS_SetDisabled($this->InstanceID, $result);
         return $result;
     }
 }

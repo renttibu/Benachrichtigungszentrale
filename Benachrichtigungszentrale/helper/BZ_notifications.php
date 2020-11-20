@@ -1,11 +1,27 @@
 <?php
 
-/** @noinspection PhpUnused */
 /** @noinspection DuplicatedCode */
+/** @noinspection PhpUnused */
+
+/*
+ * @module      Benachrichtigungszentrale
+ *
+ * @prefix      BZ
+ *
+ * @file        BZ_notifications.php
+ *
+ * @author      Ulrich Bittner
+ * @copyright   (c) 2020
+ * @license    	CC BY-NC-SA 4.0
+ *              https://creativecommons.org/licenses/by-nc-sa/4.0/
+ *
+ * @see         https://github.com/ubittner/Benachrichtigungszentrale/
+ *
+ */
 
 declare(strict_types=1);
 
-trait BZ1_notifications
+trait BZ_notifications
 {
     /**
      * Sends a notification.
@@ -244,7 +260,7 @@ trait BZ1_notifications
         if ($this->CheckMaintenanceMode()) {
             return;
         }
-        //Nexxt Mobile
+        //NeXXt Mobile
         if ($this->ReadPropertyBoolean('UseNexxtMobile')) {
             $recipients = json_decode($this->ReadPropertyString('NexxtMobileRecipients'));
             if (!empty($recipients)) {
@@ -298,35 +314,32 @@ trait BZ1_notifications
                                         $ch = curl_init();
                                         curl_setopt_array($ch, [
                                             CURLOPT_URL            => $endpoint,
+                                            CURLOPT_HEADER         => false,
                                             CURLOPT_RETURNTRANSFER => true,
                                             CURLOPT_FAILONERROR    => true,
                                             CURLOPT_CONNECTTIMEOUT => $timeout,
                                             CURLOPT_TIMEOUT        => 60]);
-                                        $response = curl_exec($ch);
-                                        $this->SendDebug(__FUNCTION__, 'NexxtMobile Response: ' . $response, 0);
+                                        $result = curl_exec($ch);
                                         if (!curl_errno($ch)) {
-                                            switch ($http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE)) {
-                                                case $http_code >= 200 && $http_code < 300:
-                                                    $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-                                                    $header = substr($response, 0, $header_size);
-                                                    $this->SendDebug(__FUNCTION__, 'Header: ' . $header, 0);
-                                                    $response = json_decode($header, true);
-                                                    if (empty($response)) {
-                                                        $this->SendDebug(__FUNCTION__, 'Nexxt Mobile, keine Rückantwort erhalten!', 0);
-                                                    } else {
-                                                        if (!array_key_exists('isError', $response)) {
-                                                            $this->SendDebug(__FUNCTION__, 'NexxtMobile, das Feld isError ist nicht enthalten!', 0);
-                                                        } else {
-                                                            $isError = $response['isError'];
+                                            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                                            switch ($httpCode) {
+                                                case $httpCode >= 200 && $httpCode < 300:
+                                                    $this->SendDebug(__FUNCTION__, 'Response: ' . $result, 0);
+                                                    $data = json_decode($result, true);
+                                                    if (!empty($data)) {
+                                                        if (array_key_exists('isError', $data)) {
+                                                            $isError = $data['isError'];
                                                             if ($isError) {
-                                                                $this->SendDebug(__FUNCTION__, 'NexxtMobile, Fehler als Rückmeldung erhalten!', 0);
+                                                                $this->SendDebug(__FUNCTION__, 'Es ist ein Fehler aufgetreten!', 0);
                                                             }
+                                                        } else {
+                                                            $this->SendDebug(__FUNCTION__, 'Es ist ein Fehler aufgetreten!', 0);
                                                         }
                                                     }
                                                     break;
 
                                                 default:
-                                                    $this->SendDebug(__FUNCTION__, 'NexxtMobile HTTP Code: ' . $http_code, 0);
+                                                    $this->SendDebug(__FUNCTION__, 'NexxtMobile HTTP Code: ' . $httpCode, 0);
                                             }
                                         } else {
                                             $error_msg = curl_error($ch);

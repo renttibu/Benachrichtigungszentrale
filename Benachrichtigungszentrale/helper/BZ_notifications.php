@@ -1,45 +1,29 @@
 <?php
 
+/*
+ * @author      Ulrich Bittner
+ * @copyright   (c) 2020, 2021
+ * @license    	CC BY-NC-SA 4.0
+ * @see         https://github.com/ubittner/Benachrichtigungszentrale/
+ */
+
 /** @noinspection DuplicatedCode */
 /** @noinspection PhpUnused */
-
-/*
- * @module      Benachrichtigungszentrale
- *
- * @prefix      BZ
- *
- * @file        BZ_notifications.php
- *
- * @author      Ulrich Bittner
- * @copyright   (c) 2020
- * @license    	CC BY-NC-SA 4.0
- *              https://creativecommons.org/licenses/by-nc-sa/4.0/
- *
- * @see         https://github.com/ubittner/Benachrichtigungszentrale/
- *
- */
 
 declare(strict_types=1);
 
 trait BZ_notifications
 {
-    /**
-     * Sends a notification.
-     *
-     * @param string $PushTitle
-     * @param string $PushText
-     * @param string $EmailSubject
-     * @param string $EmailText
-     * @param string $SMSText
-     * @param int $MessageType
-     * 0    = Notification
-     * 1    = Acknowledgement
-     * 2    = Alert
-     * 3    = Sabotage
-     * 4    = Battery
-     */
     public function SendNotification(string $PushTitle, string $PushText, string $EmailSubject, string $EmailText, string $SMSText, int $MessageType): void
     {
+        /*
+         * $MessageType
+         * 0    = Notification
+         * 1    = Acknowledgement
+         * 2    = Alert
+         * 3    = Sabotage
+         * 4    = Battery
+         */
         if ($this->CheckMaintenanceMode()) {
             return;
         }
@@ -48,9 +32,6 @@ trait BZ_notifications
         $this->SendSMSNotification($SMSText, $MessageType);
     }
 
-    /**
-     * Repeats the last alarm message, if user hasn't confirmed the message in time.
-     */
     public function RepeatAlarmNotification(): void
     {
         if ($this->CheckMaintenanceMode()) {
@@ -72,32 +53,27 @@ trait BZ_notifications
         }
     }
 
-    /**
-     * Resets the alarm notification.
-     */
     public function ConfirmAlarmNotification(): void
     {
         if ($this->CheckMaintenanceMode()) {
             return;
         }
-        $this->DeactivateTimers();
-        $this->ResetAttributes();
+        $this->SetTimerInterval('RepeatAlarmNotification', 0);
+        $this->WriteAttributeString('AlarmNotificationTitle', '');
+        $this->WriteAttributeString('AlarmNotificationText', '');
+        $this->WriteAttributeInteger('AlarmNotificationAttempt', 0);
     }
 
-    /**
-     * Sends a push notification.
-     *
-     * @param string $Title
-     * @param string $Text
-     * @param int $MessageType
-     * 0    = Notification
-     * 1    = Acknowledgement
-     * 2    = Alert
-     * 3    = Sabotage
-     * 4    = Battery
-     */
     public function SendPushNotification(string $Title, string $Text, int $MessageType): void
     {
+        /*
+         * $MessageType
+         * 0    = Notification
+         * 1    = Acknowledgement
+         * 2    = Alert
+         * 3    = Sabotage
+         * 4    = Battery
+         */
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         if ($this->CheckMaintenanceMode()) {
             return;
@@ -133,13 +109,13 @@ trait BZ_notifications
                                 if ($webFront->Alerting) {
                                     $notification = true;
                                     $sound = $webFront->AlertingSound;
-                                    //Alerting confirmation
+                                    // Alerting confirmation
                                     if ($this->ReadPropertyBoolean('ConfirmAlarmMessage')) {
                                         $this->WriteAttributeString('AlarmNotificationTitle', $Title);
                                         $this->WriteAttributeString('AlarmNotificationText', $Text);
                                         $this->WriteAttributeInteger('AlarmNotificationAttempt', 1);
                                         $target = $this->GetIDForIdent('ConfirmAlarmNotification');
-                                        //Set timer to next interval
+                                        // Set timer to next interval
                                         $duration = $this->ReadPropertyInteger('ConfirmationPeriod');
                                         $this->SetTimerInterval('RepeatAlarmNotification', $duration * 1000);
                                     }
@@ -171,20 +147,16 @@ trait BZ_notifications
         }
     }
 
-    /**
-     * Sends an email notification.
-     *
-     * @param string $Subject
-     * @param string $Text
-     * @param int $MessageType
-     * 0 = Notification
-     * 1 = Acknowledgement
-     * 2 = Alert
-     * 3 = Sabotage
-     * 4 = Battery
-     */
     public function SendEMailNotification(string $Subject, string $Text, int $MessageType): void
     {
+        /*
+         * $MessageType
+         * 0    = Notification
+         * 1    = Acknowledgement
+         * 2    = Alert
+         * 3    = Sabotage
+         * 4    = Battery
+         */
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         if ($this->CheckMaintenanceMode()) {
             return;
@@ -243,24 +215,21 @@ trait BZ_notifications
         }
     }
 
-    /**
-     * Sends a sms notification.
-     *
-     * @param string $Text
-     * @param int $MessageType
-     * 0    = Notification
-     * 1    = Acknowledgement
-     * 2    = Alert
-     * 3    = Sabotage
-     * 4    = Battery
-     */
     public function SendSMSNotification(string $Text, int $MessageType): void
     {
+        /*
+         * $MessageType
+         * 0    = Notification
+         * 1    = Acknowledgement
+         * 2    = Alert
+         * 3    = Sabotage
+         * 4    = Battery
+         */
         $this->SendDebug(__FUNCTION__, 'Die Methode wird ausgeführt (' . microtime(true) . ')', 0);
         if ($this->CheckMaintenanceMode()) {
             return;
         }
-        //NeXXt Mobile
+        // NeXXt Mobile
         if ($this->ReadPropertyBoolean('UseNexxtMobile')) {
             $recipients = json_decode($this->ReadPropertyString('NexxtMobileRecipients'));
             if (!empty($recipients)) {
@@ -354,7 +323,7 @@ trait BZ_notifications
                 }
             }
         }
-        //Sipgate
+        // Sipgate
         if ($this->ReadPropertyBoolean('UseSipgate')) {
             $userName = $this->ReadPropertyString('SipgateUser');
             $password = $this->ReadPropertyString('SipgatePassword');

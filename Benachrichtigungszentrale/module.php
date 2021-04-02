@@ -1,22 +1,13 @@
 <?php
 
-/** @noinspection PhpUnused */
-
 /*
- * @module      Benachrichtigungszentrale
- *
- * @prefix      BZ
- *
- * @file        module.php
- *
  * @author      Ulrich Bittner
- * @copyright   (c) 2020
+ * @copyright   (c) 2020, 2021
  * @license    	CC BY-NC-SA 4.0
- *              https://creativecommons.org/licenses/by-nc-sa/4.0/
- *
  * @see         https://github.com/ubittner/Benachrichtigungszentrale/
- *
  */
+
+/** @noinspection PhpUnused */
 
 declare(strict_types=1);
 
@@ -24,30 +15,70 @@ include_once __DIR__ . '/helper/autoload.php';
 
 class Benachrichtigungszentrale extends IPSModule
 {
-    //Helper
+    // Helper
     use BZ_backupRestore;
     use BZ_notifications;
 
     public function Create()
     {
-        //Never delete this line!
+        // Never delete this line!
         parent::Create();
-        $this->RegisterProperties();
-        $this->RegisterTimers();
-        $this->RegisterAttributes();
-        $this->RegisterScripts();
+
+        // Properties
+        // Functions
+        $this->RegisterPropertyBoolean('MaintenanceMode', false);
+        // Push notification (WebFront)
+        $this->RegisterPropertyBoolean('UsePushNotification', false);
+        $this->RegisterPropertyString('WebFronts', '[]');
+        $this->RegisterPropertyBoolean('ConfirmAlarmMessage', false);
+        $this->RegisterPropertyInteger('ConfirmationPeriod', 60);
+        $this->RegisterPropertyInteger('AlarmNotificationAttempts', 3);
+        // E-Mail (SMTP) notification
+        $this->RegisterPropertyBoolean('UseSMTPNotification', false);
+        $this->RegisterPropertyString('SMTPRecipients', '[]');
+        // SMS (NeXXt Mobile) notification
+        $this->RegisterPropertyBoolean('UseNexxtMobile', false);
+        $this->RegisterPropertyString('NexxtMobileToken', '');
+        $this->RegisterPropertyString('NexxtMobileSenderPhoneNumber', '');
+        $this->RegisterPropertyInteger('NexxtMobileTimeout', 5000);
+        $this->RegisterPropertyString('NexxtMobileRecipients', '[]');
+        // SMS (Sipgate) notification
+        $this->RegisterPropertyBoolean('UseSipgate', false);
+        $this->RegisterPropertyString('SipgateUser', '');
+        $this->RegisterPropertyString('SipgatePassword', '');
+        $this->RegisterPropertyInteger('SipgateTimeout', 5000);
+        $this->RegisterPropertyString('SipgateRecipients', '[]');
+
+        // Attributes
+        $this->RegisterAttributeString('AlarmNotificationTitle', '');
+        $this->RegisterAttributeString('AlarmNotificationText', '');
+        $this->RegisterAttributeInteger('AlarmNotificationAttempt', 0);
+
+        // Timer
+        $this->RegisterTimer('RepeatAlarmNotification', 0, 'BZ_RepeatAlarmNotification(' . $this->InstanceID . ');');
+
+        // Script
+        $id = $this->GetIDForIdent('ConfirmAlarmNotification');
+        $this->RegisterScript('ConfirmAlarmNotification', 'Alarmquittierung', "<?php BZ_ConfirmAlarmNotification(IPS_GetParent(\$_IPS['SELF']));");
+        if ($id == false) {
+            IPS_SetPosition($this->GetIDForIdent('ConfirmAlarmNotification'), 10);
+            IPS_SetHidden($this->GetIDForIdent('ConfirmAlarmNotification'), true);
+        }
     }
 
     public function ApplyChanges()
     {
-        //Wait until IP-Symcon is started
+        // Wait until IP-Symcon is started
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
-        //Never delete this line!
+
+        // Never delete this line!
         parent::ApplyChanges();
-        //Check runlevel
+
+        // Check runlevel
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
+
         $this->ValidateConfiguration();
     }
 
@@ -80,70 +111,11 @@ class Benachrichtigungszentrale extends IPSModule
         $this->ApplyChanges();
     }
 
-    private function RegisterProperties(): void
-    {
-        //Functions
-        $this->RegisterPropertyBoolean('MaintenanceMode', false);
-        //Push notification (WebFront)
-        $this->RegisterPropertyBoolean('UsePushNotification', false);
-        $this->RegisterPropertyString('WebFronts', '[]');
-        $this->RegisterPropertyBoolean('ConfirmAlarmMessage', false);
-        $this->RegisterPropertyInteger('ConfirmationPeriod', 60);
-        $this->RegisterPropertyInteger('AlarmNotificationAttempts', 3);
-        //E-Mail (SMTP) notification
-        $this->RegisterPropertyBoolean('UseSMTPNotification', false);
-        $this->RegisterPropertyString('SMTPRecipients', '[]');
-        //SMS (NeXXt Mobile) notification
-        $this->RegisterPropertyBoolean('UseNexxtMobile', false);
-        $this->RegisterPropertyString('NexxtMobileToken', '');
-        $this->RegisterPropertyString('NexxtMobileSenderPhoneNumber', '');
-        $this->RegisterPropertyInteger('NexxtMobileTimeout', 5000);
-        $this->RegisterPropertyString('NexxtMobileRecipients', '[]');
-        //SMS (Sipgate) notification
-        $this->RegisterPropertyBoolean('UseSipgate', false);
-        $this->RegisterPropertyString('SipgateUser', '');
-        $this->RegisterPropertyString('SipgatePassword', '');
-        $this->RegisterPropertyInteger('SipgateTimeout', 5000);
-        $this->RegisterPropertyString('SipgateRecipients', '[]');
-    }
-
-    private function RegisterTimers(): void
-    {
-        $this->RegisterTimer('RepeatAlarmNotification', 0, 'BZ_RepeatAlarmNotification(' . $this->InstanceID . ');');
-    }
-
-    private function DeactivateTimers(): void
-    {
-        $this->SetTimerInterval('RepeatAlarmNotification', 0);
-    }
-
-    private function RegisterAttributes(): void
-    {
-        $this->RegisterAttributeString('AlarmNotificationTitle', '');
-        $this->RegisterAttributeString('AlarmNotificationText', '');
-        $this->RegisterAttributeInteger('AlarmNotificationAttempt', 0);
-    }
-
-    private function ResetAttributes(): void
-    {
-        $this->WriteAttributeString('AlarmNotificationTitle', '');
-        $this->WriteAttributeString('AlarmNotificationText', '');
-        $this->WriteAttributeInteger('AlarmNotificationAttempt', 0);
-    }
-
-    private function RegisterScripts(): void
-    {
-        $this->RegisterScript('ConfirmAlarmNotification', 'Alarmquittierung', "<?php BZ_ConfirmAlarmNotification(IPS_GetParent(\$_IPS['SELF']));");
-        $resetScript = $this->GetIDForIdent('ConfirmAlarmNotification');
-        IPS_SetPosition($resetScript, 10);
-        IPS_SetHidden($resetScript, true);
-    }
-
     private function ValidateConfiguration(): bool
     {
         $result = true;
         $status = 102;
-        //Push notification
+        // Push notification
         if ($this->ReadPropertyBoolean('UsePushNotification')) {
             $webFronts = json_decode($this->ReadPropertyString('WebFronts'));
             if (!empty($webFronts)) {
@@ -160,7 +132,8 @@ class Benachrichtigungszentrale extends IPSModule
                 }
             }
         }
-        //E-Mail recipients
+
+        // E-Mail recipients
         if ($this->ReadPropertyBoolean('UseSMTPNotification')) {
             $recipients = json_decode($this->ReadPropertyString('SMTPRecipients'));
             if (!empty($recipients)) {
@@ -184,7 +157,8 @@ class Benachrichtigungszentrale extends IPSModule
                 }
             }
         }
-        //SMS (NeXXt mobile) notification
+
+        // SMS (NeXXt mobile) notification
         if ($this->ReadPropertyBoolean('UseNexxtMobile')) {
             $recipients = json_decode($this->ReadPropertyString('NexxtMobileRecipients'));
             if (!empty($recipients)) {
@@ -241,7 +215,8 @@ class Benachrichtigungszentrale extends IPSModule
                 }
             }
         }
-        //Maintenance mode
+
+        // Maintenance mode
         $maintenance = $this->CheckMaintenanceMode();
         if ($maintenance) {
             $status = 104;

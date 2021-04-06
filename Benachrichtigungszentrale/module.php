@@ -58,7 +58,7 @@ class Benachrichtigungszentrale extends IPSModule
         $this->RegisterTimer('RepeatAlarmNotification', 0, 'BZ_RepeatAlarmNotification(' . $this->InstanceID . ');');
 
         // Script
-        $id = $this->GetIDForIdent('ConfirmAlarmNotification');
+        $id = @$this->GetIDForIdent('ConfirmAlarmNotification');
         $this->RegisterScript('ConfirmAlarmNotification', 'Alarmquittierung', "<?php BZ_ConfirmAlarmNotification(IPS_GetParent(\$_IPS['SELF']));");
         if ($id == false) {
             IPS_SetPosition($this->GetIDForIdent('ConfirmAlarmNotification'), 10);
